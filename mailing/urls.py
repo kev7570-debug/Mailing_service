@@ -27,4 +27,5 @@ urlpatterns = [
     path('mailings/create/', views.MailingCreateView.as_view(), name='mailing_create'),
     path('mailings/<int:pk>/update/', views.MailingUpdateView.as_view(), name='mailing_update'),
     path('mailings/<int:pk>/delete/', views.MailingDeleteView.as_view(), name='mailing_delete'),
+    path('mailings/<int:pk>/send/', views.send_mailing_view, name='send_mailing'),
 ]

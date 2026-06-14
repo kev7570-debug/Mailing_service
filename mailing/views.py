@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db.models import Count
 from .models import Client, Message, Mailing, MailingAttempt
 from .forms import ClientForm, MessageForm, MailingForm
+from .services import send_mailing
 
 
 # Главная страница со статистикой
@@ -144,3 +145,19 @@ class MailingDeleteView(SuccessMessageMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, self.success_message)
         return super().delete(request, *args, **kwargs)
+
+
+# ==================== Ручной запуск рассылки ====================
+
+def send_mailing_view(request, pk):
+    """Представление для ручного запуска рассылки"""
+    mailing = get_object_or_404(Mailing, pk=pk)
+
+    # Запускаем отправку
+    send_mailing(pk)
+
+    # Показываем сообщение об успехе
+    messages.success(request, f'Рассылка #{pk} успешно запущена!')
+
+    # Возвращаемся на страницу деталей рассылки
+    return redirect('mailing:mailing_detail', pk=pk)
