@@ -1,5 +1,6 @@
 from django.db import models
-from django.core.validators import MinLengthValidator
+from django.utils import timezone
+# from django.core.validators import MinLengthValidator
 
 
 # Create your models here.
@@ -60,10 +61,9 @@ class Message(models.Model):
 
 class Mailing(models.Model):
     """
-    Модель рассылки
+    Модель рассылки. Статус вычисляется динамически на основе текущего времени.
     """
-
-    # Статусы рассылки (вынесены в отдельный кортеж для удобства)
+    # Статусы рассылки
     STATUS_CREATED = 'Создана'
     STATUS_STARTED = 'Запущена'
     STATUS_COMPLETED = 'Завершена'
@@ -74,13 +74,13 @@ class Mailing(models.Model):
         (STATUS_COMPLETED, 'Завершена'),
     ]
 
-    start_datetime = models.DateTimeField(
-        verbose_name='Дата и время первой отправки',
-        help_text='Укажите дату и время начала рассылки'
+    start_time = models.DateTimeField(
+        verbose_name='Дата и время начала отправки',
+        help_text='Укажите дату и время, когда рассылка должна начаться'
     )
-    end_datetime = models.DateTimeField(
+    end_time = models.DateTimeField(
         verbose_name='Дата и время окончания отправки',
-        help_text='Укажите дату и время окончания рассылки'
+        help_text='Укажите дату и время, когда рассылка должна закончиться'
     )
     status = models.CharField(
         max_length=20,
@@ -105,10 +105,46 @@ class Mailing(models.Model):
     def __str__(self):
         return f"Рассылка #{self.id} - {self.message.subject[:30]}"
 
+    def update_status(self):
+        """
+        Вычисляет текущий статус и обновляет его в базе данных, если он изменился.
+        """
+        now = timezone.now()
+        new_status = None
+
+        if now < self.start_time:
+            new_status = 'Создана'
+        elif self.start_time <= now <= self.end_time:
+            new_status = 'Запущена'
+        else:
+            new_status = 'Завершена'
+
+        # Если статус изменился — обновляем его в БД
+        if self.status != new_status:
+            self.status = new_status
+            # Сохраняем только поле status, чтобы не задеть другие поля
+            Mailing.objects.filter(pk=self.pk).update(status=new_status)
+
+        return self.status
+
+    def save(self, *args, **kwargs):
+        """
+        При создании новой рассылки автоматически вычисляем статус.
+        """
+        if not self.pk:  # Если это новая запись
+            now = timezone.now()
+            if now < self.start_time:
+                self.status = 'Создана'
+            elif self.start_time <= now <= self.end_time:
+                self.status = 'Запущена'
+            else:
+                self.status = 'Завершена'
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
-        ordering = ['-start_datetime']
+        ordering = ['-start_time']
         permissions = [
             ("can_view_all_mailings", "Can view all mailings"),
             ("can_disable_mailings", "Can disable mailings"),

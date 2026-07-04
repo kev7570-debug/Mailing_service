@@ -1,20 +1,29 @@
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 from .models import Mailing, MailingAttempt
-
 
 def send_mailing(mailing_id):
     """
-    Отправляет все письма для указанной рассылки
-    и создаёт записи о попытках.
+    Отправляет письма для рассылки, проверяя, что текущее время
+    находится между start_time и end_time.
     """
     mailing = Mailing.objects.get(id=mailing_id)
-    recipients = mailing.recipients.all()
 
-    # Перебираем всех получателей
+    # 1. Проверка времени
+    now = timezone.now()
+    if not (mailing.start_time <= now <= mailing.end_time):
+        raise ValueError(
+            f"Рассылка может быть отправлена только с {mailing.start_time} по {mailing.end_time}"
+        )
+
+    # 2. Определяем получателей
+    recipients = mailing.recipients.all()
+    attempts_to_create = []
+
+    # 3. Отправляем письма и готовим записи для пакетного создания
     for recipient in recipients:
         try:
-            # Пытаемся отправить письмо
             send_mail(
                 subject=mailing.message.subject,
                 message=mailing.message.body,
@@ -22,21 +31,27 @@ def send_mailing(mailing_id):
                 recipient_list=[recipient.email],
                 fail_silently=False,
             )
-            # Если успешно - создаём запись об успехе
-            MailingAttempt.objects.create(
-                status='Успешно',
-                server_response='Письмо успешно отправлено',
-                mailing=mailing,
+            attempts_to_create.append(
+                MailingAttempt(
+                    status='Успешно',
+                    server_response='Письмо успешно отправлено',
+                    mailing=mailing,
+                )
             )
         except Exception as e:
-            # Если ошибка - создаём запись с ошибкой
-            MailingAttempt.objects.create(
-                status='Не успешно',
-                server_response=str(e),
-                mailing=mailing,
+            attempts_to_create.append(
+                MailingAttempt(
+                    status='Не успешно',
+                    server_response=str(e),
+                    mailing=mailing,
+                )
             )
 
-    # После отправки обновляем статус рассылки
-    if mailing.status == 'Создана':
-        mailing.status = 'Запущена'
-        mailing.save()
+    # 4. Пакетное создание записей о попытках (bulk_create)
+    if attempts_to_create:
+        MailingAttempt.objects.bulk_create(attempts_to_create)
+
+    # 5. Обновляем статус рассылки (он изменится, если время отправки уже прошло)
+    mailing.update_status()
+
+    return True

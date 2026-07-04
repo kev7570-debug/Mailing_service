@@ -111,13 +111,18 @@ class MailingListView(ListView):
     model = Mailing
     template_name = 'mailing/mailing_list.html'
     context_object_name = 'mailings'
-    ordering = ['-start_datetime']
+    ordering = ['-start_time']
 
 
 class MailingDetailView(DetailView):
     model = Mailing
     template_name = 'mailing/mailing_detail.html'
     context_object_name = 'mailing'
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        obj.update_status()  # ← Обновляем статус при каждом просмотре
+        return obj
 
 
 class MailingCreateView(SuccessMessageMixin, CreateView):

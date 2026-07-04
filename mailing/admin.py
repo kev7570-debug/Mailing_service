@@ -21,8 +21,8 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(Mailing)
 class MailingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'start_datetime', 'end_datetime', 'status', 'message')
-    list_filter = ('status', 'start_datetime')
+    list_display = ('id', 'start_time', 'end_time', 'status', 'message')  # ← исправлено
+    list_filter = ('status', 'start_time')  # ← исправлено
     filter_horizontal = ('recipients',)
 
 
