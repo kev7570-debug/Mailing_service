@@ -7,6 +7,8 @@ from django.db.models import Count
 from .models import Client, Message, Mailing, MailingAttempt
 from .forms import ClientForm, MessageForm, MailingForm
 from .services import send_mailing
+from django.contrib.auth import login
+from .forms import CustomUserCreationForm
 
 
 # Главная страница со статистикой
@@ -166,3 +168,15 @@ def send_mailing_view(request, pk):
 
     # Возвращаемся на страницу деталей рассылки
     return redirect('mailing:mailing_detail', pk=pk)
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Автоматически входим после регистрации
+            messages.success(request, 'Регистрация прошла успешно!')
+            return redirect('mailing:home')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})

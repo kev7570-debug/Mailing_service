@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Вход в систему</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Войти</button>
+                    <a href="{% url 'password_reset' %}" class="btn btn-link">Забыли пароль?</a>
+                </form>
+                <hr>
+                <p>Нет аккаунта? <a href="{% url 'mailing:register' %}">Зарегистрируйтесь</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -16,15 +16,37 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'mailing:client_list' %}">Клиенты</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'mailing:message_list' %}">Сообщения</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'mailing:mailing_list' %}">Рассылки</a>
-                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mailing:client_list' %}">Клиенты</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mailing:message_list' %}">Сообщения</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mailing:mailing_list' %}">Рассылки</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="navbar-text me-3">Привет, {{ user.username }}!</span>
+                        </li>
+                        <li class="nav-item">
+                            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link" style="display: inline; padding: 0; border: none;">Выход</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Вход</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mailing:register' %}">Регистрация</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

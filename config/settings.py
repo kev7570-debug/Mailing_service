@@ -119,3 +119,11 @@ STATIC_URL = 'static/'
 
 # Настройки для отправки писем (тестовый режим - вывод в консоль)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# ========== НАСТРОЙКИ АУТЕНТИФИКАЦИИ ==========
+# URL-адреса для входа и выхода
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'mailing:home'
+LOGOUT_REDIRECT_URL = 'login'
+
