@@ -37,8 +37,10 @@
                 </td>
                 <td>
                     <a href="{% url 'mailing:mailing_detail' mailing.pk %}" class="btn btn-sm btn-info">Просмотр</a>
-                    <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-sm btn-warning">Ред.</a>
-                    <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-sm btn-danger">Удалить</a>
+    {% if mailing.owner == user %}
+        <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-sm btn-warning">Ред.</a>
+        <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-sm btn-danger">Удалить</a>
+    {% endif %}
                 </td>
             </tr>
             {% endfor %}

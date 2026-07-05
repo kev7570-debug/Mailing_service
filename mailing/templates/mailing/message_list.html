@@ -1,38 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}Клиенты{% endblock %}
+{% block title %}Сообщения{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Клиенты</h1>
-    <a href="{% url 'mailing:client_create' %}" class="btn btn-primary">➕ Добавить клиента</a>
+    <h1>Сообщения</h1>
+    <a href="{% url 'mailing:message_create' %}" class="btn btn-primary">➕ Добавить сообщение</a>
 </div>
 
-{% if clients %}
-    <div class="row">
-        {% for client in clients %}
-            <div class="col-md-6 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ client.full_name }}</h5>
-                        <p class="card-text">
-                            <strong>Email:</strong> {{ client.email }}<br>
-                            {% if client.comment %}
-                                <strong>Комментарий:</strong> {{ client.comment|truncatewords:20 }}
-                            {% endif %}
-                        </p>
-                        <a href="{% url 'mailing:client_detail' client.pk %}" class="btn btn-sm btn-info">Подробнее</a>
-                        <a href="{% url 'mailing:client_update' client.pk %}" class="btn btn-sm btn-warning">Редактировать</a>
-                        <a href="{% url 'mailing:client_delete' client.pk %}" class="btn btn-sm btn-danger">Удалить</a>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+{% if messages %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Тема</th>
+                <th>Тело письма</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for message in messages %}
+            <tr>
+                <td>{{ message.id }}</td>
+                <td>{{ message.subject|truncatechars:30 }}</td>
+                <td>{{ message.body|truncatechars:50 }}</td>
+                <td>
+                    <a href="{% url 'mailing:message_detail' message.pk %}" class="btn btn-sm btn-info">Просмотр</a>
+                    <a href="{% url 'mailing:message_update' message.pk %}" class="btn btn-sm btn-warning">Ред.</a>
+                    <a href="{% url 'mailing:message_delete' message.pk %}" class="btn btn-sm btn-danger">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% else %}
     <div class="alert alert-info">
-        Клиенты пока не добавлены. 
-        <a href="{% url 'mailing:client_create' %}">Создайте первого клиента</a>
+        Сообщения пока не добавлены.
+        <a href="{% url 'mailing:message_create' %}">Создайте первое сообщение</a>
     </div>
 {% endif %}
 {% endblock %}
