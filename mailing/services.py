@@ -11,11 +11,11 @@ def send_mailing(mailing_id):
     mailing = Mailing.objects.get(id=mailing_id)
 
     # 1. Проверка времени
-    now = timezone.now()
-    if not (mailing.start_time <= now <= mailing.end_time):
-        raise ValueError(
-            f"Рассылка может быть отправлена только с {mailing.start_time} по {mailing.end_time}"
-        )
+    # now = timezone.now()
+    # if not (mailing.start_time <= now <= mailing.end_time):
+    #     raise ValueError(
+    #         f"Рассылка может быть отправлена только с {mailing.start_time} по {mailing.end_time}"
+    #     )
 
     # 2. Определяем получателей
     recipients = mailing.recipients.all()

@@ -1,6 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils import timezone
-# from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator
 
 
 # Create your models here.
@@ -24,8 +25,15 @@ class Client(models.Model):
         verbose_name='Комментарий',
         help_text='Дополнительная информация о клиенте'
     )
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Владелец',
+        related_name='clients',
+        null=True,
+        blank=True
+    )
 
-    # Для отображения в админке и дебаге
     def __str__(self):
         return f"{self.full_name} ({self.email})"
 
@@ -48,9 +56,16 @@ class Message(models.Model):
         verbose_name='Тело письма',
         help_text='Введите текст сообщения'
     )
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Владелец',
+        related_name='messages',
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
-        # Возвращаем первые 50 символов темы для краткости
         return self.subject[:50]
 
     class Meta:
@@ -100,6 +115,14 @@ class Mailing(models.Model):
         related_name='mailings',
         verbose_name='Получатели',
         help_text='Выберите получателей рассылки'
+    )
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Владелец',
+        related_name='mailings',
+        null=True,
+        blank=True
     )
 
     def __str__(self):

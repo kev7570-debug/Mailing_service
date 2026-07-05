@@ -4,11 +4,11 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.db.models import Count
-from .models import Client, Message, Mailing, MailingAttempt
-from .forms import ClientForm, MessageForm, MailingForm
-from .services import send_mailing
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login
-from .forms import CustomUserCreationForm
+from .models import Client, Message, Mailing, MailingAttempt
+from .forms import ClientForm, MessageForm, MailingForm, CustomUserCreationForm
+from .services import send_mailing
 
 
 # Главная страница со статистикой
@@ -25,28 +25,38 @@ def home(request):
 
 # ==================== CRUD для клиентов ====================
 
-class ClientListView(ListView):
+class ClientListView(LoginRequiredMixin, ListView):
     model = Client
     template_name = 'mailing/client_list.html'
     context_object_name = 'clients'
     ordering = ['full_name']
 
+    def get_queryset(self):
+        return Client.objects.filter(owner=self.request.user)
 
-class ClientDetailView(DetailView):
+
+class ClientDetailView(LoginRequiredMixin, DetailView):
     model = Client
     template_name = 'mailing/client_detail.html'
     context_object_name = 'client'
 
+    def get_queryset(self):
+        return Client.objects.filter(owner=self.request.user)
 
-class ClientCreateView(SuccessMessageMixin, CreateView):
+
+class ClientCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Client
     form_class = ClientForm
     template_name = 'mailing/client_form.html'
     success_url = reverse_lazy('mailing:client_list')
     success_message = 'Клиент "%(full_name)s" успешно добавлен!'
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class ClientUpdateView(SuccessMessageMixin, UpdateView):
+
+class ClientUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Client
     form_class = ClientForm
     template_name = 'mailing/client_form.html'
@@ -54,7 +64,7 @@ class ClientUpdateView(SuccessMessageMixin, UpdateView):
     success_message = 'Клиент "%(full_name)s" успешно обновлён!'
 
 
-class ClientDeleteView(SuccessMessageMixin, DeleteView):
+class ClientDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     model = Client
     template_name = 'mailing/client_confirm_delete.html'
     success_url = reverse_lazy('mailing:client_list')
@@ -67,28 +77,38 @@ class ClientDeleteView(SuccessMessageMixin, DeleteView):
 
 # ==================== CRUD для сообщений ====================
 
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     model = Message
     template_name = 'mailing/message_list.html'
     context_object_name = 'messages'
     ordering = ['-id']
 
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
 
-class MessageDetailView(DetailView):
+
+class MessageDetailView(LoginRequiredMixin, DetailView):
     model = Message
     template_name = 'mailing/message_detail.html'
     context_object_name = 'message'
 
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
 
-class MessageCreateView(SuccessMessageMixin, CreateView):
+
+class MessageCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Message
     form_class = MessageForm
     template_name = 'mailing/message_form.html'
     success_url = reverse_lazy('mailing:message_list')
     success_message = 'Сообщение "%(subject)s" успешно создано!'
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class MessageUpdateView(SuccessMessageMixin, UpdateView):
+
+class MessageUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Message
     form_class = MessageForm
     template_name = 'mailing/message_form.html'
@@ -96,7 +116,7 @@ class MessageUpdateView(SuccessMessageMixin, UpdateView):
     success_message = 'Сообщение "%(subject)s" успешно обновлено!'
 
 
-class MessageDeleteView(SuccessMessageMixin, DeleteView):
+class MessageDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     model = Message
     template_name = 'mailing/message_confirm_delete.html'
     success_url = reverse_lazy('mailing:message_list')
@@ -109,33 +129,43 @@ class MessageDeleteView(SuccessMessageMixin, DeleteView):
 
 # ==================== CRUD для рассылок ====================
 
-class MailingListView(ListView):
+class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     template_name = 'mailing/mailing_list.html'
     context_object_name = 'mailings'
     ordering = ['-start_time']
 
+    def get_queryset(self):
+        return Mailing.objects.filter(owner=self.request.user)
 
-class MailingDetailView(DetailView):
+
+class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
     template_name = 'mailing/mailing_detail.html'
     context_object_name = 'mailing'
 
+    def get_queryset(self):
+        return Mailing.objects.filter(owner=self.request.user)
+
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        obj.update_status()  # ← Обновляем статус при каждом просмотре
+        obj.update_status()
         return obj
 
 
-class MailingCreateView(SuccessMessageMixin, CreateView):
+class MailingCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
     success_url = reverse_lazy('mailing:mailing_list')
     success_message = 'Рассылка успешно создана!'
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class MailingUpdateView(SuccessMessageMixin, UpdateView):
+
+class MailingUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
@@ -143,7 +173,7 @@ class MailingUpdateView(SuccessMessageMixin, UpdateView):
     success_message = 'Рассылка успешно обновлена!'
 
 
-class MailingDeleteView(SuccessMessageMixin, DeleteView):
+class MailingDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     model = Mailing
     template_name = 'mailing/mailing_confirm_delete.html'
     success_url = reverse_lazy('mailing:mailing_list')
@@ -160,6 +190,11 @@ def send_mailing_view(request, pk):
     """Представление для ручного запуска рассылки"""
     mailing = get_object_or_404(Mailing, pk=pk)
 
+    # Проверяем, что пользователь является владельцем рассылки
+    if mailing.owner != request.user:
+        messages.error(request, 'У вас нет прав для запуска этой рассылки.')
+        return redirect('mailing:mailing_list')
+
     # Запускаем отправку
     send_mailing(pk)
 
@@ -169,12 +204,13 @@ def send_mailing_view(request, pk):
     # Возвращаемся на страницу деталей рассылки
     return redirect('mailing:mailing_detail', pk=pk)
 
+
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # Автоматически входим после регистрации
+            login(request, user)
             messages.success(request, 'Регистрация прошла успешно!')
             return redirect('mailing:home')
     else:
