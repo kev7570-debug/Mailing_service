@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Сервис рассылок{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1>Добро пожаловать в сервис управления рассылками</h1>
+    <p class="lead">Управляйте своими клиентами, сообщениями и рассылками</p>
+</div>
+
+<div class="row text-center">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h2 class="display-4">{{ total_mailings }}</h2>
+                <p class="mb-0">Всего рассылок</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h2 class="display-4">{{ active_mailings }}</h2>
+                <p class="mb-0">Активных рассылок</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h2 class="display-4">{{ unique_clients }}</h2>
+                <p class="mb-0">Получателей</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">📧 Клиенты</h5>
+                <p class="card-text">Управление списком получателей рассылок</p>
+                <a href="{% url 'mailing:client_list' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">✉️ Сообщения</h5>
+                <p class="card-text">Создание и редактирование шаблонов писем</p>
+                <a href="{% url 'mailing:message_list' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">📨 Рассылки</h5>
+                <p class="card-text">Настройка и запуск массовых рассылок</p>
+                <a href="{% url 'mailing:mailing_list' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
