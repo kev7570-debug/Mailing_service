@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ytvse-zk@b(j!-h#5^8k#&4nuu@%)zyz_^u+l#rf680bevdf_r'
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -127,3 +129,18 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'mailing:home'
 LOGOUT_REDIRECT_URL = 'login'
 
+
+# ========== НАСТРОЙКИ КЕШИРОВАНИЯ ==========
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache'),  # Папка cache в корне проекта
+        'TIMEOUT': 300,  # Время жизни кеша в секундах (5 минут)
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,  # Максимальное количество записей в кеше
+        }
+    }
+}
+
+# Клиентское кеширование статики
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
