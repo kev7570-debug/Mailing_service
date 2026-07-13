@@ -3,11 +3,11 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
-from django.db.models import Count
+# from django.db.models import Count
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import login
+# from django.contrib.auth import login
 from .models import Client, Message, Mailing, MailingAttempt
-from .forms import ClientForm, MessageForm, MailingForm, CustomUserCreationForm
+from .forms import ClientForm, MessageForm, MailingForm
 from .services import send_mailing
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
@@ -308,14 +308,14 @@ def send_mailing_view(request, pk):
     return redirect('mailing:mailing_detail', pk=pk)
 
 
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, 'Регистрация прошла успешно!')
-            return redirect('mailing:home')
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+# def register(request):
+#     if request.method == 'POST':
+#         form = CustomUserCreationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             login(request, user)
+#             messages.success(request, 'Регистрация прошла успешно!')
+#             return redirect('mailing:home')
+#     else:
+#         form = CustomUserCreationForm()
+#     return render(request, 'registration/register.html', {'form': form})
